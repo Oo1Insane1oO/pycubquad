@@ -52,21 +52,6 @@ def quadraticSolver():
             b/denominators[1], c/denominators[2])
 # and function quadraticSolver
 
-def turnToCpp(funcName, expression, *args):
-    """ turn expression into C++ code with sympy and save template function
-    expression to string """
-    subsDict = {};
-    argString = ""
-    for arg in args:
-        argName = str(arg)
-        argString += "T " + argName + ", "
-        subsDict[argName] = arg
-    # end forarg
-    subsDict['expr'] = sp.printing.ccode(expression.subs(subsDict))
-    return '''template<typename T> T ''' + funcName + ('''%(''' + argString +
-            ''') {return %(expr)s;}''') % (subsDict)
-# and function turnToCpp
-
 if __name__ == "__main__":
     """ print and plot solution """
     sol, x0, x1, f0, f1, g0, a, b, c = quadraticSolver()
