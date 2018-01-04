@@ -13,7 +13,7 @@ def cubicSolver():
     # set symbolic variables for f(x) = ax^3+bx^2+cx+d, with g=3ax^2+2bx+c being
     # the derivative of f with respect to x, and interpolation points x0 and x1
     a, b, c, d = sp.symbols('a b c d', real=True)
-    x0, x1 = sp.symbols('x_0 x_1', real=True, positive=True)
+    x0, x1 = sp.symbols('x_0 x_1', real=True)
     f0, f1, g0, g1 = sp.symbols('f_0 f_1 g_0 g_1', real=True)
 
     # define linear system as a matrix with the columns corresponding to a, b, c
@@ -72,13 +72,6 @@ if __name__ == "__main__":
     sp.pprint(xtp)
     sp.pprint(xtm)
 
-#     # substitute difference and sums of common symbols
-#     subser = lambda expr: expr.subs({x0-x1:sp.symbols("delta_x", real=True),
-#         f0-f1:sp.symbols("delta_f", real=True), g0-g1:sp.symbols("delta_g",
-#             real=True), x0+x1:sp.symbols("sigma_x", real=True),
-#         f0+f1:sp.symbols("sigma_f", real=True), g0+g1:sp.symbols("sigma_g",
-#             real=True)})
-   
     # make a quartic polynomial and substitute symbols with numerical values
     c4, c3, c2, c1, c0 = 1.0, 1.0, 1./2, 1./3, 1./4
     E = lambda x: c0*x**4 + c1*x**3 + c2*x + c3*x + c4

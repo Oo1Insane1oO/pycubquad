@@ -12,7 +12,7 @@ def quadraticSolver():
     # set symbolic variables for f(x) = ax^2+bx+c, with g=2ax+b being the
     # derivative of f with respect to x, and interpolation points x0 and x1
     a, b, c = sp.symbols('a b c', real=True)
-    x0, x1 = sp.symbols('x_0 x_1', real=True, positive=True)
+    x0, x1 = sp.symbols('x_0 x_1', real=True)
     f0, f1, g0 = sp.symbols('f_0 f_1 g_0', real=True)
 
     # define linear system as a matrix with the columns corresponding to a, b and c
@@ -44,7 +44,7 @@ def quadraticSolver():
     c = sp.collect(b, (g0,x0))
 
     # split solution in numerator and denominator and restructure nominator
-    snom, sdenom = sp.fraction(-b/(2*a))
+    snom, sdenom = sp.fraction(-0.5*b/a)
     snomArgs = tuple(snom.args)
     snom = sp.factor(snomArgs[0]) + snomArgs[1]
 
