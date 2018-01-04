@@ -52,8 +52,7 @@ if __name__ == "__main__":
         x0, x1, f0, f1, g0 = args
         subser = {x0-x1:sp.symbols("diff_x", real=True),
                 f0-f1:sp.symbols("diff_f", real=True),
-                x0+x1:sp.symbols("sum_x", real=True), f0+f1:sp.symbols("sum_f",
-                    real=True)}
+                x0+x1:sp.symbols("sum_x", real=True)}
         funcName = "quadPol"
     elif mode == "cubic":
         """ find quadratic interpolation """
@@ -67,8 +66,8 @@ if __name__ == "__main__":
         subser = {x0-x1:sp.symbols("diff_x", real=True),
                 f0-f1:sp.symbols("diff_f", real=True),
                 g0-g1:sp.symbols("diff_g", real=True),
-                x0+x1:sp.symbols("sum_x", real=True), f0+f1:sp.symbols("sum_f",
-                    real=True), g0+g1:sp.symbols("sum_g", real=True)}
+                x0+x1:sp.symbols("sum_x", real=True), g0+g1:sp.symbols("sum_g",
+                    real=True)}
         funcName = "cubicPol"
     else:
         """ print error message """
