@@ -61,7 +61,7 @@ def cubicSolver():
     # solve quadratic equation to find interpolation points x_t+ and x_t- which
     # minimize the function (set derivative g(x_t) equal to zero and solve for
     # x_t)
-    sqrtFactor = sp.sqrt(1 - sp.factor(3*a*c/b**2))
+    sqrtFactor = sp.sqrt(1 - 3*a*c/b**2)
     return ((-1 + sqrtFactor) / (3*a), (-1 - sqrtFactor) / (3*a), x0, x1, f0,
             f1, g0, g1, a/denominators[0], b/denominators[1],
             c/denominators[2], d/denominators[3])
