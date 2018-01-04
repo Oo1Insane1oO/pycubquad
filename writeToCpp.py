@@ -7,10 +7,10 @@ from cubic import cubicSolver
 import sympy as sp
 import sys
 
-def turnToCpp(funcName, expression, sumDiffSubDict, *args):
-    """ turn expression into C++ code with sympy and save template function
-    expression to string """
-    subsDict = {};
+def makeArgsDict(args):
+    """ make a string for function arguments and a dictionary with variable as
+    key and expression as value. Return both string and dictionary """
+    subsDict = {}
     argString = ""
     for arg in args:
         argName = str(arg)
@@ -18,13 +18,37 @@ def turnToCpp(funcName, expression, sumDiffSubDict, *args):
         subsDict[argName] = arg
     # end forarg
     argString = argString[:-2]
+
+    return subsDict, argString
+# end function makeArgsDict
+
+def turnToCppQuad(funcName, expression, sumDiffSubDict, *args):
+    """ turn expression into C++ code with sympy and save template function
+    expression to string """
+    subsDict, argString = makeArgsDict(args)
     subsDict['expr'] = \
             sp.printing.ccode((expression.subs(subsDict)).subs(sumDiffSubDict))
+
     return '''template<typename T> T ''' + funcName + ('''(''' + argString +
-            ''') {\n''' + ''''''.join(["     T "+str(val)+" = "+str(key)+";\n" for
+            ''') {\n''' + ''''''.join(["    T "+str(val)+" = "+str(key)+";\n" for
                 key,val in sumDiffSubDict.iteritems()]) + '''    return '''
             '''%(expr)s;\n}''') % (subsDict)
-# and function turnToCpp
+# and function turnToCppQuad
+
+def turnToCppCubic(funcName, expressionPlus, expressionMinus, c0, c1,
+        sumDiffSubDict, *args):
+    """ turn expression into C++ code with sympy and save template function
+    expression to string """
+    subsDict, argString = makeArgsDict(args)
+    subsDict['exprp'] = sp.printing.ccode((expressionPlus.subs(subsDict)) . \
+            subs(sumDiffSubDict))
+    subsDict['exprm'] = sp.printing.ccode((expressionMinus.subs(subsDict)) . \
+            subs(sumDiffSubDict))
+    subsDict['secExpr'] = sp.printing.ccode(((6*c0*sp.symbols("xtp",real=True)
+        + 2*c1).subs(subsDict)).subs(sumDiffSubDict))
+
+    return '''template<typename T> T ''' + funcName + ('''(''' + argString + ''') {\n''' + ''''''.join(["     T "+str(val)+" = "+str(key)+";\n" for key,val in sumDiffSubDict.iteritems()]) + '''   T xtp = %(exprp)s;\n    if (%(secExpr)s > 0) {\n        return xtp;\n    } else {\n        return %(exprm)s;\n    }\n}''') % (subsDict)
+# end function turnToCppCubic
 
 if __name__ == "__main__":
     try:
@@ -54,43 +78,37 @@ if __name__ == "__main__":
                 f0-f1:sp.symbols("diff_f", real=True),
                 x0+x1:sp.symbols("sum_x", real=True)}
         funcName = "quadPol"
+        print ("turning into C++ code...")
+        codes = turnToCppQuad(funcName, sol, subser, *args)
     elif mode == "cubic":
         """ find quadratic interpolation """
         print("finding cubic fit")
         returned = cubicSolver()
         sol = returned[:2]
         args = returned[2:-4]
+        a, b = returned[-4:-2]
         
-        # substitute difference and sums of common symbols
+        # substitute difference and sums of common symbols and second
         x0, x1, f0, f1, g0, g1 = args
         subser = {x0-x1:sp.symbols("diff_x", real=True),
                 f0-f1:sp.symbols("diff_f", real=True),
                 g0-g1:sp.symbols("diff_g", real=True),
                 x0+x1:sp.symbols("sum_x", real=True), g0+g1:sp.symbols("sum_g",
                     real=True)}
+        # second derivative for minimum
         funcName = "cubicPol"
+        print ("turning into C++ code...")
+        codes = turnToCppCubic(funcName, sol[0], sol[1], a, b, subser, *args)
     else:
         """ print error message """
         print("Specify interpolation method! (quad/cubic)")
         sys.exit(1);
     # end ifeifelse
-       
-    # turn expression into string representing C++ template and write to file
-    print ("turning into C++ code...")
-    if mode == "cubic":
-        """ two solutions to write with cubic interpolation """
-        codes = [turnToCpp(funcName+"Plus", sol[0], subser, *args),
-                turnToCpp(funcName+"Minus", sol[1], subser, *args)]
-    else:
-        """ only one solution to write with quadratic interpolation """
-        codes = [turnToCpp(funcName, sol, subser, *args)]
-    # end ifelse
 
     # write code to file filename
     with open(filename, "w") as writeFile:
         """ open file for writing """
-        for c in codes:
-            writeFile.write(c+"\n")
+        writeFile.write(codes+"\n")
         # end forc
     # end with open
 # and ifmain
