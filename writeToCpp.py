@@ -1,7 +1,7 @@
 # write expression for minimum of interpolation from quadratic or cubic to C++
 # code as a C++ template function
 
-from quadratic import quadraticSolver
+from quadratic import *
 from cubic import cubicSolver
 
 import sympy as sp
@@ -68,18 +68,31 @@ if __name__ == "__main__":
     if mode == "quadratic" or mode == "quad":
         """ find quadratic interpolation """
         print("finding quadratic fit...")
-        returned = quadraticSolver()
-        sol = returned[0]
-        args = returned[1:-3]
+        quad = Quad()
+        returned = quad.quadraticSolver()
+        sols = returned[0]
+        args = returned[1:7]
+        order = [i.replace("(","").replace(")","").replace(",","") for i in
+                returned[-1]]
 
         # substitute difference and sums of common symbols
-        x0, x1, f0, f1, g0 = args
+        x0, x1, f0, f1, g0, g1 = args
         subser = {x0-x1:sp.symbols("diff_x", real=True),
                 f0-f1:sp.symbols("diff_f", real=True),
-                x0+x1:sp.symbols("sum_x", real=True)}
+                x0+x1:sp.symbols("sum_x", real=True),
+                g0-g1:sp.symbols("diff_g", real=True)}
         funcName = "quadPol"
         print ("turning into C++ code...")
-        codes = turnToCppQuad(funcName, sol, subser, *args)
+        codes = [
+                turnToCppQuad(funcName+order[0], sols[0], subser, x0, x1, f0, f1,
+                    g0),
+                turnToCppQuad(funcName+order[1], sols[1], subser, x0, x1, f0, f1,
+                    g1),
+                turnToCppQuad(funcName+order[2], sols[2], subser, x0, x1, f0, g0,
+                    g1),
+                turnToCppQuad(funcName+order[3], sols[3], subser, x0, x1, f1, g0,
+                    g1)
+                ]
     elif mode == "cubic":
         """ find quadratic interpolation """
         print("finding cubic fit")
@@ -98,7 +111,7 @@ if __name__ == "__main__":
         # second derivative for minimum
         funcName = "cubicPol"
         print ("turning into C++ code...")
-        codes = turnToCppCubic(funcName, sol[0], sol[1], a, b, subser, *args)
+        codes = [turnToCppCubic(funcName, sol[0], sol[1], a, b, subser, *args)]
     else:
         """ print error message """
         print("Specify interpolation method! (quad/cubic)")
@@ -108,7 +121,8 @@ if __name__ == "__main__":
     # write code to file filename
     with open(filename, "w") as writeFile:
         """ open file for writing """
-        writeFile.write(codes+"\n")
+        for c in codes:
+            writeFile.write(c+"\n")
         # end forc
     # end with open
 # and ifmain
