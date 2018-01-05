@@ -77,20 +77,19 @@ if __name__ == "__main__":
 
         # substitute difference and sums of common symbols
         x0, x1, f0, f1, g0, g1 = args
-        subser = {x0-x1:sp.symbols("diff_x", real=True),
-                f0-f1:sp.symbols("diff_f", real=True),
-                x0+x1:sp.symbols("sum_x", real=True),
-                g0-g1:sp.symbols("diff_g", real=True)}
+        xdiff, fdiff, gdiff = (sp.symbols("diff_x", real=True),
+                sp.symbols("diff_f", real=True), sp.symbols("diff_g",
+                    real=True))
         funcName = "quadPol"
         print ("turning into C++ code...")
         codes = [
-                turnToCppQuad(funcName+order[0], sols[0], subser, x0, x1, f0, f1,
-                    g0),
-                turnToCppQuad(funcName+order[1], sols[1], subser, x0, x1, f0, f1,
+                turnToCppQuad(funcName+order[0], sols[0], {x0-x1:xdiff,
+                    f0-f1:fdiff}, x0, x1, f0, f1, g0),
+                turnToCppQuad(funcName+order[1], sols[1], {x0-x1:xdiff,
+                    f0-f1:fdiff}, x0, x1, f0, f1, g1),
+                turnToCppQuad(funcName+order[2], sols[2], {}, x0, x1, f0, g0,
                     g1),
-                turnToCppQuad(funcName+order[2], sols[2], subser, x0, x1, f0, g0,
-                    g1),
-                turnToCppQuad(funcName+order[3], sols[3], subser, x0, x1, f1, g0,
+                turnToCppQuad(funcName+order[3], sols[3], {}, x0, x1, f1, g0,
                     g1)
                 ]
     elif mode == "cubic":
